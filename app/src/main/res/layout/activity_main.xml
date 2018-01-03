@@ -18,7 +18,8 @@
         android:layout_weight="1">
         <LinearLayout
             android:layout_width="322dp"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:orientation="horizontal" >
 
             <CheckBox
@@ -47,13 +48,14 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:orientation="vertical" >
 
             <TextView
                 android:id="@+id/tvDeviceNode"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:text="Device Node:" />
 
             <TextView
@@ -69,7 +71,8 @@
             android:editable="false"
             android:id="@+id/edtLog"
             android:layout_width="match_parent"
-            android:layout_height="120dp"
+            android:layout_height="0dp"
+            android:layout_weight="2"
             android:ems="10"
             android:gravity="center_vertical|top"
             android:inputType="textMultiLine"
@@ -81,7 +84,8 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:gravity="bottom"
             android:orientation="horizontal" >
 
@@ -93,7 +97,6 @@
                 android:text="ClearLog" />
             <Button
                 android:onClick="pay"
-                android:layout_gravity="right"
                 android:text="充值"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />

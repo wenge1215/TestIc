@@ -53,7 +53,11 @@ public class UsbTypeCallBack {
         }
         if (null == m_LotusCardDevice)
             return bResult;
-        m_LotusCardInterface = m_LotusCardDevice.getInterface(0);
+        try {
+            m_LotusCardInterface = m_LotusCardDevice.getInterface(0);
+        } catch (Exception e){
+            return bResult;
+        }
         if (null == m_LotusCardInterface)
             return bResult;
         if (false == m_UsbManager.hasPermission(m_LotusCardDevice)) {

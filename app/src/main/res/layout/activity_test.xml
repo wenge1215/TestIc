@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="example.wen.com.testic.TestActivity">
+
+    <TimePicker
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"/>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="50dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="50dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_curr_moey"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:text="当前金额为："
+            android:textColor="@android:color/black"
+            android:textSize="22sp"/>
+
+
+        <TextView
+            android:id="@+id/tv_pay_moey"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_below="@+id/textView"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:text="消费金额：2.5"
+            android:textColor="@android:color/black"
+            android:textSize="22sp"/>
+
+        <TextView
+            android:id="@+id/tv_balance"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_below="@+id/textView2"
+            android:layout_centerHorizontal="true"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:text="消费后余额："
+            android:textColor="@android:color/black"
+            android:textSize="22sp"/>
+
+
+    </LinearLayout>
+
+</LinearLayout>

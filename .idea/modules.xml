@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/SerialPortLibrary/SerialPortLibrary.iml" filepath="$PROJECT_DIR$/SerialPortLibrary/SerialPortLibrary.iml" />
       <module fileurl="file://$PROJECT_DIR$/TestIc.iml" filepath="$PROJECT_DIR$/TestIc.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>

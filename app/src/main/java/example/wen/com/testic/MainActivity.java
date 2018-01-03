@@ -1,16 +1,10 @@
 package example.wen.com.testic;
 
-import android.app.PendingIntent;
-import android.content.Intent;
-import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbDeviceConnection;
-import android.hardware.usb.UsbInterface;
-import android.hardware.usb.UsbManager;
 import android.media.MediaPlayer;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -20,26 +14,30 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.kongqw.serialportlibrary.SerialPortManager;
+import com.kongqw.serialportlibrary.listener.OnOpenSerialPortListener;
+import com.kongqw.serialportlibrary.listener.OnSerialPortDataListener;
+
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 
 import cc.lotuscard.LotusCardDriver;
 import cc.lotuscard.LotusCardParam;
+import example.wen.com.testic.utils.MediaUtils;
 
 import static example.wen.com.testic.utils.ConvertUtils.add;
 import static example.wen.com.testic.utils.ConvertUtils.bytes2Double;
 import static example.wen.com.testic.utils.ConvertUtils.double2Bytes;
 import static example.wen.com.testic.utils.ConvertUtils.sub;
+import static example.wen.com.testic.utils.FileUtils.getAssetsCacheFile;
+import static example.wen.com.testic.utils.MediaUtils.playMp3;
 import static example.wen.com.testic.utils.UsbTypeCallBack.SetUsbCallBack;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnOpenSerialPortListener {
+    /*********************************** 读卡 *********************************/
     private LotusCardDriver mLotusCardDriver;
-
     private Boolean m_bUseUsbHostApi = true;
     /**
      * chockbox 是否勾选
@@ -50,24 +48,6 @@ public class MainActivity extends AppCompatActivity {
      * 设备句柄
      */
     private int m_nDeviceHandle = -1;
-    private Handler m_Handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-            Date curDate = new Date(System.currentTimeMillis());// ?????????
-            String strDate = formatter.format(curDate);
-            if (null == m_edtLog)
-                return;
-            String strLogs = m_edtLog.getText().toString().trim();
-            if (strLogs.equals("")) {
-                strLogs = strDate + " " + msg.obj.toString();
-            } else {
-                strLogs += "\r\n" + strDate + " " + msg.obj.toString();
-            }
-            m_edtLog.setText(strLogs);
-            super.handleMessage(msg);
-        }
-    };
     private MainActivity.CardOperateThread m_CardOperateThread;
     private Boolean m_bCardOperateThreadRunning = false;
     /*********************************** UI *********************************/
@@ -81,6 +61,35 @@ public class MainActivity extends AppCompatActivity {
     private String mString;
     private String mS;
     private String TAG = "MainActivity";
+
+
+    /*********************************** 扫码 *********************************/
+    private SerialPortManager mSerialPortManager;
+    public static final String DEVICE = "device";
+
+
+    private Handler m_Handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            initLog(msg.obj.toString());
+            super.handleMessage(msg);
+        }
+    };
+
+    private void initLog(String msg) {
+        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+        Date curDate = new Date(System.currentTimeMillis());// ?????????
+        String strDate = formatter.format(curDate);
+        if (null == m_edtLog)
+            return;
+        String strLogs = m_edtLog.getText().toString().trim();
+        if (strLogs.equals("")) {
+            strLogs = strDate + " " + msg;
+        } else {
+            strLogs += "\r\n" + strDate + " " + msg;
+        }
+        m_edtLog.setText(strLogs);
+    }
 
     @Override
     protected void onDestroy() {
@@ -99,8 +108,9 @@ public class MainActivity extends AppCompatActivity {
             m_bCardOperateThreadRunning = !m_bCardOperateThreadRunning;
 
         }
-        if (-1 != m_nDeviceHandle)
+        if (-1 != m_nDeviceHandle) {
             mLotusCardDriver.CloseDevice(m_nDeviceHandle);
+        }
         super.onDestroy();
     }
 
@@ -108,6 +118,79 @@ public class MainActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initView();
+        initUsbHostApi();
+        initScanCode();
+
+//        startVideo();
+
+    }
+
+    /**
+     * 初始化扫码
+     */
+    private void initScanCode() {
+        String div = "/dev/ttySAC2";
+        File file = new File(div);
+
+        mSerialPortManager = new SerialPortManager();
+
+        // 打开串口
+        boolean openSerialPort = mSerialPortManager.setOnOpenSerialPortListener(this)
+                .setOnSerialPortDataListener(new OnSerialPortDataListener() {
+                    @Override
+                    public void onDataReceived(byte[] bytes) {
+                        Log.i(TAG, "onDataReceived [ byte[] ]: " + Arrays.toString(bytes));
+                        Log.i(TAG, "onDataReceived [ String ]: " + new String(bytes));
+                        final byte[] finalBytes = bytes;
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                //  TODO  扫码成功
+                                if (null != finalBytes && finalBytes.length > 0) {
+                                    initLog(new String(finalBytes));
+                                    Toast.makeText(MainActivity.this, new String(finalBytes), Toast.LENGTH_SHORT).show();
+                                    playMp3(MediaUtils.SCAN_SUCCEED);
+                                } else {
+                                    playMp3(MediaUtils.FAILURE);
+                                }
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onDataSent(byte[] bytes) {
+                        Log.i(TAG, "onDataSent [ byte[] ]: " + Arrays.toString(bytes));
+                        Log.i(TAG, "onDataSent [ String ]: " + new String(bytes));
+                        final byte[] finalBytes = bytes;
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                            }
+                        });
+                    }
+                })
+                .openSerialPort(file, 115200);
+
+
+    }
+
+    /**
+     * 设置USB读写回调 串口可以不用此操作
+     */
+    private void initUsbHostApi() {
+        m_bCanUseUsbHostApi = SetUsbCallBack();
+        if (m_bCanUseUsbHostApi) {
+            AddLog("Find LotusSmart IC Reader!");
+            m_tvDeviceNode.setText("Device Node:" + m_strDeviceNode);
+        } else {
+            AddLog("Not Find LotusSmart IC Reader!");
+        }
+        m_chkUseUsbHostApi.setChecked(m_bCanUseUsbHostApi);
+        mLotusCardDriver = new LotusCardDriver();
+    }
+
+    private void initView() {
         m_btnTest = (Button) findViewById(R.id.btnTest);
         m_btnAutoTest = (Button) findViewById(R.id.btnAutoTest);
         m_edtLog = (EditText) findViewById(R.id.edtLog);
@@ -118,21 +201,6 @@ public class MainActivity extends AppCompatActivity {
         m_edtLog.setText("");
 
         m_chkUseUsbHostApi = (CheckBox) findViewById(R.id.chkUseUsbHostApi);
-
-        // 设置USB读写回调 串口可以不用此操作
-        m_bCanUseUsbHostApi = SetUsbCallBack();
-        if (m_bCanUseUsbHostApi) {
-            AddLog("Find LotusSmart IC Reader!");
-            m_tvDeviceNode.setText("Device Node:" + m_strDeviceNode);
-        } else {
-            AddLog("Not Find LotusSmart IC Reader!");
-        }
-        m_chkUseUsbHostApi.setChecked(m_bCanUseUsbHostApi);
-
-        mLotusCardDriver = new LotusCardDriver();
-
-//        startVideo();
-
     }
 
     private void startVideo() {
@@ -146,6 +214,7 @@ public class MainActivity extends AppCompatActivity {
         mVideoView.seekTo(0);
         //用来设置mp4播放器是否可以聚焦
         mVideoView.requestFocus();
+      
         //开始播放
         mVideoView.start();
         //videoView.pause();暂停播放
@@ -161,35 +230,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * 读取asses目录下的文件
-     *
-     * @param fileName
-     * @return
-     */
-    public String getAssetsCacheFile(String fileName) {
-        File cacheFile = new File(getCacheDir(), fileName);
-        try {
-            InputStream inputStream = getAssets().open(fileName);
-            try {
-                FileOutputStream outputStream = new FileOutputStream(cacheFile);
-                try {
-                    byte[] buf = new byte[1024];
-                    int len;
-                    while ((len = inputStream.read(buf)) > 0) {
-                        outputStream.write(buf, 0, len);
-                    }
-                } finally {
-                    outputStream.close();
-                }
-            } finally {
-                inputStream.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return cacheFile.getAbsolutePath();
-    }
 
     /**
      * 单次读取测试
@@ -422,7 +462,7 @@ public class MainActivity extends AppCompatActivity {
      * @param strLog
      */
     private void AddLog(String strLog) {
-        Log.e(TAG, strLog);
+//        Log.e(TAG, strLog);
     }
 
     public long bytes2long(byte[] byteNum) {
@@ -461,6 +501,7 @@ public class MainActivity extends AppCompatActivity {
             m_bStop = true;
         }
 
+        @Override
         public void run() {
             boolean bResult = false;
             int nRequestType;
@@ -473,7 +514,9 @@ public class MainActivity extends AppCompatActivity {
              * 总的说，这句就是无限判断当前线程状态，如果没有中断，就一直执行while内容。
              */
             while (!Thread.currentThread().isInterrupted()) {        //µ±Ç°Ïß³ÌÃ»ÓÐ±»ÖÐ¶Ï£¬Ö´ÐÐËÀÑ­»·
-                if (m_bStop) break;
+                if (m_bStop) {
+                    break;
+                }
                 try {
                     nRequestType = LotusCardDriver.RT_NOT_HALT;
                     bResult = readCard(m_nDeviceHandle, nRequestType, tLotusCardParam1);
@@ -511,4 +554,18 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+
+    /*********************************** 开启串口监听 *********************************/
+    @Override
+    public void onSuccess(File device) {
+        Toast.makeText(this, "开启串口成功：" + device.getName(), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onFail(File device, Status status) {
+        Toast.makeText(this, "开启串口失败", Toast.LENGTH_SHORT).show();
+    }
+
+
 }

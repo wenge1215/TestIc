@@ -39,6 +39,19 @@ public class ConvertUtils {
                 strText.length());
     }
 
+    public static long bytes2long(byte[] byteNum) {
+        long num = 0;
+        for (int ix = 3; ix >= 0; --ix) {
+            num <<= 8;
+            if (byteNum[ix] < 0) {
+                num |= (256 + (byteNum[ix]) & 0xff);
+            } else {
+                num |= (byteNum[ix] & 0xff);
+            }
+        }
+        return num;
+    }
+
 
     /**
      * 提供精确减法运算的sub方法
