@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
+
     <application
         android:name=".MyApp"
         android:allowBackup="true"
@@ -16,23 +17,25 @@
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="landscape">
-        <!--<intent-filter>-->
-        <!--<action android:name="android.intent.action.MAIN"/>-->
+            <!--<intent-filter>-->
+            <!--<action android:name="android.intent.action.MAIN"/>-->
 
-        <!--<category android:name="android.intent.category.LAUNCHER"/>-->
-        <!--</intent-filter>-->
-        <!--<intent-filter>-->
-        <!--<action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"/>-->
-        <!--</intent-filter>-->
-        <!--<intent-filter>-->
-        <!--<action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"/>-->
-        <!--</intent-filter>-->
+            <!--<category android:name="android.intent.category.LAUNCHER"/>-->
+            <!--</intent-filter>-->
+            <!--<intent-filter>-->
+            <!--<action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"/>-->
+            <!--</intent-filter>-->
+            <!--<intent-filter>-->
+            <!--<action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"/>-->
+            <!--</intent-filter>-->
 
-        <!--<meta-data-->
-        <!--android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"-->
-        <!--android:resource="@xml/device_filter"/>-->
+            <!--<meta-data-->
+            <!--android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"-->
+            <!--android:resource="@xml/device_filter"/>-->
         </activity>
+
         <activity
+            android:launchMode="singleTask"
             android:name=".TestActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="landscape">
@@ -42,12 +45,15 @@
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
+            <!--监听IC卡模块初始化的过滤器-->
             <intent-filter>
-                <action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"/>
+            <action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"/>
+            <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"/>
             </intent-filter>
+            <!--监听IC卡模块初始化的过滤器-->
 
             <meta-data
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"

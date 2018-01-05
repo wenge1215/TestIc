@@ -18,6 +18,10 @@ public class MyApp extends Application {
         SPUtils.getInstance().init(this, "balance_sp");
     }
 
+    /**
+     * 本地
+     * 初始化金额
+     */
     private void initBalance() {
         SPUtils instance = SPUtils.getInstance();
         instance.init(this, "balance_sp");

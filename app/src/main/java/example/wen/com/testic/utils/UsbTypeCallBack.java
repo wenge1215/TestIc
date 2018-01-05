@@ -64,6 +64,9 @@ public class UsbTypeCallBack {
             m_UsbManager.requestPermission(m_LotusCardDevice, pendingIntent);
         }
         UsbDeviceConnection conn = null;
+        /**
+         * 打开USB设备，以便向此USB设备发送和接受数据，返回一个关于此USB设备的连接。
+         */
         if (m_UsbManager.hasPermission(m_LotusCardDevice)) {
             conn = m_UsbManager.openDevice(m_LotusCardDevice);
         }

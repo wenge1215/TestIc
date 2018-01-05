@@ -1,5 +1,6 @@
 package example.wen.com.testic;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -68,13 +69,30 @@ public class TestActivity extends AppCompatActivity implements OnOpenSerialPortL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
         initView();
+//        initBalance();
+//        initIcCard();
+//        initScanCode();
+//        initUsbHostApi();
+        m_Handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        }, 5000);
+
+    }
+
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Toast.makeText(this, "onNewIntent 回调", Toast.LENGTH_SHORT).show();
+        Log.i(TAG, "onNewIntent 回调");
         initBalance();
         initIcCard();
         initScanCode();
         initUsbHostApi();
     }
-
-
 
     private void initBalance() {
         String balance = SPUtils.getInstance().getString("balance");
@@ -178,7 +196,9 @@ public class TestActivity extends AppCompatActivity implements OnOpenSerialPortL
      * 连续刷卡
      */
     public void onAutoTestListener() {
+
         if (-1 == m_nDeviceHandle) {
+         /*   /dev/bus/usb/001/005    */
             m_nDeviceHandle = mLotusCardDriver.OpenDevice("", 0, 0,
                     true);
         }
@@ -264,7 +284,7 @@ public class TestActivity extends AppCompatActivity implements OnOpenSerialPortL
         bResult = mLotusCardDriver.GetCardNo(nDeviceHandle, nRequestType,
                 tLotusCardParam1);
         if (!bResult) {
-            Log.e(TAG, "Call GetCardNo Error!");
+//            Log.e(TAG, "Call GetCardNo Error!");
             return false;
         }
 
@@ -345,6 +365,27 @@ public class TestActivity extends AppCompatActivity implements OnOpenSerialPortL
         //TODO  播放充值成功
         Log.e(TAG, "Call Write Ok!");
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        if ((m_nDeviceHandle != -1) && (null != m_CardOperateThread)) {
+            if (true == m_bCardOperateThreadRunning) {
+                m_CardOperateThread.cancel();
+                m_CardOperateThread = null;
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            m_bCardOperateThreadRunning = !m_bCardOperateThreadRunning;
+
+        }
+        if (-1 != m_nDeviceHandle) {
+            mLotusCardDriver.CloseDevice(m_nDeviceHandle);
+        }
+        super.onDestroy();
     }
 
 
